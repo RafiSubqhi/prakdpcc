@@ -14,44 +14,46 @@
     <button onclick="tambahItem()">Tambah</button>
 
     <script>
-        // WAJIB: Menggunakan relative path agar Ingress AKS berfungsi
-        const API_URL = 'http://localhost:5000/api/info'; 
+    // 1. Perbaiki URL agar tidak double 'info'
+    const API_URL = 'http://localhost:5000/api'; 
 
-        function loadData() {
-            fetch(`${API_URL}/info`)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('judul').innerText = data.judul_katalog;
-                    document.getElementById('owner').innerText = "Nama: " + data.pemilik;
-                    document.getElementById('nim').innerText = "NIM: " + data.nim;
+    function loadData() {
+        // Ini akan memanggil http://localhost:5000/api/info
+        fetch(`${API_URL}/info`)
+            .then(res => res.json())
+            .then(data => {
+                // Sesuai dengan JSON yang kamu dapat tadi: "nama", "nim", dan "menu"
+                document.getElementById('judul').innerText = "Katalog Milik " + data.nama;
+                document.getElementById('owner').innerText = "Nama: " + data.nama;
+                document.getElementById('nim').innerText = "NIM: " + data.nim;
 
-                    let list = document.getElementById('list');
-                    list.innerHTML = '';
+                let list = document.getElementById('list');
+                list.innerHTML = '';
 
-                    // Menampilkan list item dari backend[cite: 14, 21]
-                    data.items.forEach(item => {
-                        let li = document.createElement('li');
-                        li.innerText = item;
-                        list.appendChild(li);
-                    });
+                // Gunakan 'data.menu' karena di JSON kamu kuncinya adalah "menu"
+                data.menu.forEach(item => {
+                    let li = document.createElement('li');
+                    li.innerText = item;
+                    list.appendChild(li);
                 });
-        }
+            })
+            .catch(err => console.error("Gagal load data:", err));
+    }
 
-        function tambahItem() {
-            let input = document.getElementById('inputItem');
+    function tambahItem() {
+        let input = document.getElementById('inputItem');
+        // Ini akan memanggil http://localhost:5000/api/add-item
+        fetch(`${API_URL}/add-item`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({item: input.value})
+        }).then(() => {
+            input.value = '';
+            loadData();
+        });
+    }
 
-            fetch(`${API_URL}/add-item`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({item: input.value})
-            }).then(() => {
-                input.value = '';
-                loadData();
-            });
-        }
-
-        // Jalankan fungsi saat halaman dimuat[cite: 21]
-        loadData();
-    </script>
+    loadData();
+</script>
 </body>
 </html>
