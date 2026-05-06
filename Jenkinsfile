@@ -10,7 +10,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/RafiSubqhi/prakdpcc.git'
+                git branch: 'main',
+                    url: 'https://github.com/RafiSubqhi/prakdpcc.git'
             }
         }
 
@@ -26,7 +27,7 @@ pipeline {
             }
         }
 
-        stage('Push Docker') {
+        stage('Docker Login & Push') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
