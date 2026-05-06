@@ -1,6 +1,6 @@
 # Cari bagian env di dalam spec container backend
 env:
 - name: NAMA_PRAKTIKAN
-  value: "Rafi Subqhi"[cite: 14]
+  value: "Rafi Subqhi Nuraziz"[cite: 14]
 - name: NIM_PRAKTIKAN
   value: "2408678"[cite: 14]
