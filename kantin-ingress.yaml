@@ -1,3 +1,25 @@
-// Di dalam stage Build & Push Images
-sh "docker build -t ${DOCKER_HUB_USER}/kantin-backend:latest ./backend"[cite: 2, 4]
-sh "docker build -t ${DOCKER_HUB_USER}/kantin-frontend:latest ./frontend"[cite: 2, 6]
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kantin-ingress
+  # annotations:
+  #   nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: kantin.local
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 5000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
