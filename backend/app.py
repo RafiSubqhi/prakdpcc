@@ -1,34 +1,32 @@
+import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import os
 
 app = Flask(__name__)
 CORS(app)
 
-kantin_data = {
-    "nama_kantin": "Kantin FPMIPA",
-    "menu": ["Nasi Goreng", "Es Teh", "Gorengan"]
+# Membaca Environment Variables dari Kubernetes[cite: 14]
+nama_owner = os.environ.get('NAMA_PRAKTIKAN', 'Misterius')
+nim_owner = os.environ.get('NIM_PRAKTIKAN', '00000000')
+
+# Struktur data Gaming Loadout[cite: 14, 17]
+katalog_data = {
+    "judul_katalog": f"Katalog Milik {nama_owner}",
+    "pemilik": nama_owner,
+    "nim": nim_owner,
+    "items": ["Arcane Boots", "Glowing Wand"]
 }
 
 @app.route('/api/info', methods=['GET'])
 def get_info():
-    return jsonify({
-        "nama_kantin": kantin_data["nama_kantin"],
-        "menu": kantin_data["menu"],
+    return jsonify(katalog_data)
 
-        "nama": os.getenv("NAMA", "Tidak ada"),
-        "nim": os.getenv("NIM", "Tidak ada")
-    })
-
-@app.route('/api/add-menu', methods=['POST'])
-def add_menu():
+@app.route('/api/add-item', methods=['POST'])
+def add_item():
     new_item = request.json.get('item')
     if new_item:
-        kantin_data["menu"].append(new_item)
-        return jsonify({
-            "message": "Menu berhasil ditambah!",
-            "menu": kantin_data["menu"]
-        }), 201
+        katalog_data["items"].append(new_item)
+        return jsonify({"message": "Item berhasil ditambahkan!", "items": katalog_data["items"]}), 201
     return jsonify({"error": "Data tidak valid"}), 400
 
 if __name__ == '__main__':
