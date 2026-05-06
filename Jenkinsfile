@@ -1,51 +1,34 @@
 pipeline {
     agent any
-
     environment {
-        BACKEND_IMAGE = "rafisuqbhi/kantin-backend:latest"
-        FRONTEND_IMAGE = "rafisuqbhi/kantin-frontend:latest"
+        DOCKER_USER = "rafisuqbhi"
+        DOCKER_CREDS = 'dockerhub' // ID di Jenkins
+        KUBE_CREDS = 'kubeconfig'   // ID di Jenkins
     }
-
     stages {
-
-        stage('Checkout') {
+        stage('Build & Push') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/RafiSubqhi/prakdpcc.git'
-            }
-        }
-
-        stage('Build Backend') {
-            steps {
-                sh 'docker build -t $BACKEND_IMAGE ./backend'
-            }
-        }
-
-        stage('Build Frontend') {
-            steps {
-                sh 'docker build -t $FRONTEND_IMAGE ./frontend'
-            }
-        }
-
-        stage('Docker Login & Push') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
-                    sh '''
-                    echo $PASS | docker login -u $USER --password-stdin
-                    docker push $BACKEND_IMAGE
-                    docker push $FRONTEND_IMAGE
-                    '''
+                script {
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDS}", passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh "echo $PASS | docker login -u $USER --password-stdin"
+                        
+                        // Build & Push Backend
+                        sh "docker build -t ${DOCKER_USER}/kantin-backend:latest ./backend"[cite: 2, 4]
+                        sh "docker push ${DOCKER_USER}/kantin-backend:latest"
+                        
+                        // Build & Push Frontend 
+                        sh "docker build -t ${DOCKER_USER}/kantin-frontend:latest ./frontend"[cite: 2, 6]
+                        sh "docker push ${DOCKER_USER}/kantin-frontend:latest"
+                    }
                 }
             }
         }
-
-        stage('Deploy Kubernetes') {
+        stage('Deploy to AKS') {
             steps {
-                sh 'kubectl apply -f kantin-k8s.yaml.yml'
+                withCredentials([file(credentialsId: "${KUBE_CREDS}", variable: 'KUBE')]) {
+                    sh "kubectl --kubeconfig=${KUBE} apply -f kantin-k8s.yaml.yml"[cite: 11]
+                    sh "kubectl --kubeconfig=${KUBE} apply -f kantin-ingress.yaml"[cite: 10]
+                }
             }
         }
     }
