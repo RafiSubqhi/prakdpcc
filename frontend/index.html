@@ -15,7 +15,7 @@
 
     <script>
         // WAJIB: Menggunakan relative path agar Ingress AKS berfungsi
-        const API_URL = '/api'; 
+        const API_URL = 'http://backend-service:5000/api/menu'; 
 
         function loadData() {
             fetch(`${API_URL}/info`)
